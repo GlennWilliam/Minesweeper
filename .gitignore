@@ -1,5 +1,5 @@
-\.vscode
-\bin
-\lib
+.vscode\
+bin\
+lib\
 
 README.md

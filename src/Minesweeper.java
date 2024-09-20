@@ -32,6 +32,7 @@ public class Minesweeper {
     JPanel textPanel = new JPanel(); // Panel to hold the text label
     JPanel boardPanel = new JPanel(); // Panel to hold the game board
     JButton restartButton = new JButton("Restart"); // Button to restart the game
+    JLabel timerLabel = new JLabel("Time: 0"); // Timer label
 
     MineTile[][] board = new MineTile[numRows][numColumns]; // 2D array to hold the tiles
     ArrayList<MineTile> mineList; // List to hold the mines
@@ -40,6 +41,9 @@ public class Minesweeper {
     Random random = new Random();
     int tilesClicked = 0; 
     boolean gameOver = false;
+    Timer timer;
+    int elapsedTime = 0;
+    boolean timerStarted = false; // Flag to check if the timer has started
 
     Minesweeper(){
         frame.setSize(boardWidth, boardHeight);
@@ -54,7 +58,8 @@ public class Minesweeper {
         textLabel.setOpaque(true);
 
         textPanel.setLayout(new BorderLayout());
-        textPanel.add(textLabel);
+        textPanel.add(textLabel, BorderLayout.CENTER);
+        textPanel.add(timerLabel, BorderLayout.WEST); // Add timer label to the panel
         textPanel.add(restartButton, BorderLayout.EAST);
         frame.add(textPanel, BorderLayout.NORTH);
 
@@ -71,7 +76,6 @@ public class Minesweeper {
         initializeBoard();
         frame.setVisible(true);
         
-
         setMines();
     }
 
@@ -90,6 +94,11 @@ public class Minesweeper {
                     public void mousePressed(MouseEvent e) {
                         if (gameOver) {
                             return;
+                        }
+                        if (!timerStarted) {
+                            startTimer();
+                            timerStarted = true;
+                            System.out.println("Timer started");
                         }
                         MineTile tile = (MineTile) e.getSource();
                         if (e.getButton() == MouseEvent.BUTTON1) {
@@ -139,6 +148,7 @@ public class Minesweeper {
         }
         gameOver = true;
         textLabel.setText("Game Over");
+        stopTimer();
     }
 
     void checkMine(int r, int c){
@@ -192,6 +202,7 @@ public class Minesweeper {
         if(tilesClicked == numRows * numColumns - mineList.size()){
             gameOver = true;
             textLabel.setText("You Win!");
+            stopTimer();
         }
     }
 
@@ -209,7 +220,28 @@ public class Minesweeper {
         gameOver = false;
         tilesClicked = 0;
         textLabel.setText("Minesweeper: " + Integer.toString(mineCount));
+        timerLabel.setText("Time: 0"); // Reset the timer label
         initializeBoard();
         setMines();
+        stopTimer();
+        timerStarted = false;
+    }
+    
+    void startTimer() {
+        elapsedTime = 0;
+        timer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                elapsedTime++;
+                timerLabel.setText("Time: " + elapsedTime);
+            }
+        });
+        timer.start();
+    }
+
+    void stopTimer() {
+        if (timer != null) {
+            timer.stop();
+        }
     }
 }

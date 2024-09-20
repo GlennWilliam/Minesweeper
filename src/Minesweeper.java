@@ -18,26 +18,50 @@ public class Minesweeper {
         }
     }
 
-    int tileSize = 70;
-    int numRows = 8;
-    int numColumns = numRows;
-    int boardWidth = numColumns * tileSize;
-    int boardHeight = numRows * tileSize;
+    enum Level {
+        EASY(4, 4, 6),
+        MEDIUM(8, 8, 20),
+        HARD(16, 16, 40);
+
+        int rows;
+        int columns;
+        int mines;
+        int tileSize;
+
+        Level(int rows, int columns, int mines) {
+            this.rows = rows;
+            this.columns = columns;
+            // this.tileSize = tileSize;
+            this.mines = mines;
+        }
+    }
+    
+    Level currentLevel = Level.EASY;
+    int numRows = currentLevel.rows;
+    int numColumns = currentLevel.columns;
+    int mineCount = currentLevel.mines;
+    final int boardWidth = 768; // Fixed board width
+    final int boardHeight = 768; // Fixed board height
+    int tileSize = Math.min(boardWidth / numColumns, boardHeight / numRows);
+
 
     // JFrame is a top-level container used to create a window in a Swing application.
     // JLabel is a component that displays a short string or an image icon.
     // JPanel is a generic lightweight container.
+    // JButton is a component that triggers an event when clicked.
+    // JLabel is a component that displays a short string or an image icon.
+    // JComboBox is a component that combines a button or editable field and a drop-down list.
     JFrame frame = new JFrame("Minesweeper"); // Main window of the game
     JLabel textLabel = new JLabel(); // Label to display text 
     JPanel textPanel = new JPanel(); // Panel to hold the text label
     JPanel boardPanel = new JPanel(); // Panel to hold the game board
     JButton restartButton = new JButton("Restart"); // Button to restart the game
     JLabel timerLabel = new JLabel("Time: 0"); // Timer label
+    JComboBox<Level> levelSelector = new JComboBox<>(Level.values()); // Dropdown to select the level
 
     MineTile[][] board = new MineTile[numRows][numColumns]; // 2D array to hold the tiles
     ArrayList<MineTile> mineList; // List to hold the mines
 
-    int mineCount = 10;
     Random random = new Random();
     int tilesClicked = 0; 
     boolean gameOver = false;
@@ -62,6 +86,7 @@ public class Minesweeper {
         textPanel.add(timerLabel, BorderLayout.WEST); // Add timer label to the panel
         textPanel.add(restartButton, BorderLayout.EAST);
         frame.add(textPanel, BorderLayout.NORTH);
+        textPanel.add(levelSelector, BorderLayout.SOUTH); // Add level selector to the panel
 
         boardPanel.setLayout(new GridLayout(numRows, numColumns));
         frame.add(boardPanel);
@@ -73,6 +98,14 @@ public class Minesweeper {
             }
         });
 
+        levelSelector.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                currentLevel = (Level) levelSelector.getSelectedItem();
+                restartGame();
+            }
+        });
+
         initializeBoard();
         frame.setVisible(true);
         
@@ -80,7 +113,16 @@ public class Minesweeper {
     }
 
     void initializeBoard() {
+        numRows = currentLevel.rows;
+        numColumns = currentLevel.columns;
+        mineCount = currentLevel.mines;
+        tileSize = Math.min(boardWidth / numColumns, boardHeight / numRows);
+
+        board = new MineTile[numRows][numColumns];
         boardPanel.removeAll();
+        boardPanel.setLayout(new GridLayout(numRows, numColumns));
+        frame.setSize(boardWidth, boardHeight + 100); // Adjust frame size based on level
+
         for (int r = 0; r < numRows; r++) {
             for (int c = 0; c < numColumns; c++) {
                 MineTile tile = new MineTile(r, c);
@@ -88,7 +130,7 @@ public class Minesweeper {
 
                 tile.setFocusable(false);
                 tile.setMargin(new Insets(0, 0, 0, 0));
-                tile.setFont(new Font("Arial", Font.PLAIN, 45));
+                tile.setFont(new Font("Arial", Font.PLAIN, 20));
                 tile.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mousePressed(MouseEvent e) {
@@ -98,7 +140,6 @@ public class Minesweeper {
                         if (!timerStarted) {
                             startTimer();
                             timerStarted = true;
-                            System.out.println("Timer started");
                         }
                         MineTile tile = (MineTile) e.getSource();
                         if (e.getButton() == MouseEvent.BUTTON1) {

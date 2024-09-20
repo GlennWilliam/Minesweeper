@@ -1,7 +1,11 @@
-.vscode\
-bin\
-lib\
+# Ignore .vscode directory
+.vscode/
 
-README.md
+# Ignore bin directory
+bin/
 
+# Ignore lib directory
+lib/
+
+# Ignore all .class files
 *.class

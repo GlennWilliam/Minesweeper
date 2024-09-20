@@ -31,6 +31,7 @@ public class Minesweeper {
     JLabel textLabel = new JLabel(); // Label to display text 
     JPanel textPanel = new JPanel(); // Panel to hold the text label
     JPanel boardPanel = new JPanel(); // Panel to hold the game board
+    JButton restartButton = new JButton("Restart"); // Button to restart the game
 
     MineTile[][] board = new MineTile[numRows][numColumns]; // 2D array to hold the tiles
     ArrayList<MineTile> mineList; // List to hold the mines
@@ -54,42 +55,55 @@ public class Minesweeper {
 
         textPanel.setLayout(new BorderLayout());
         textPanel.add(textLabel);
+        textPanel.add(restartButton, BorderLayout.EAST);
         frame.add(textPanel, BorderLayout.NORTH);
 
         boardPanel.setLayout(new GridLayout(numRows, numColumns));
         frame.add(boardPanel);
 
-        for (int r = 0; r < numRows; r++){
-            for (int c = 0; c < numColumns; c++){
+        restartButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                restartGame();
+            }
+        });
+
+        initializeBoard();
+        frame.setVisible(true);
+        
+
+        setMines();
+    }
+
+    void initializeBoard() {
+        boardPanel.removeAll();
+        for (int r = 0; r < numRows; r++) {
+            for (int c = 0; c < numColumns; c++) {
                 MineTile tile = new MineTile(r, c);
                 board[r][c] = tile;
 
                 tile.setFocusable(false);
                 tile.setMargin(new Insets(0, 0, 0, 0));
                 tile.setFont(new Font("Arial", Font.PLAIN, 45));
-                tile.addMouseListener(new MouseAdapter(){
+                tile.addMouseListener(new MouseAdapter() {
                     @Override
-                    public void mousePressed(MouseEvent e){
-                        if(gameOver){
+                    public void mousePressed(MouseEvent e) {
+                        if (gameOver) {
                             return;
                         }
                         MineTile tile = (MineTile) e.getSource();
-                        if(e.getButton() == MouseEvent.BUTTON1){ // 1: Left Click; 2: Scroll; 3: Right Click
-                            if(tile.getText() == ""){
-                                if(mineList.contains(tile)){
+                        if (e.getButton() == MouseEvent.BUTTON1) {
+                            if (tile.getText().equals("")) {
+                                if (mineList.contains(tile)) {
                                     revealMines();
-                                }
-                                else{
+                                } else {
                                     checkMine(tile.r, tile.c);
                                 }
                             }
-                    
-                        }
-                        else if(e.getButton() == MouseEvent.BUTTON3){ // Right Click
-                            if(tile.getText() == ""){
+                        } else if (e.getButton() == MouseEvent.BUTTON3) {
+                            if (tile.getText().equals("")) {
                                 tile.setText("🚩");
-                            }
-                            else if(tile.getText() == "🚩"){
+                            } else if (tile.getText().equals("🚩")) {
                                 tile.setText("");
                             }
                         }
@@ -97,14 +111,10 @@ public class Minesweeper {
                 });
 
                 boardPanel.add(tile);
-                
             }
         }
-
-        frame.setVisible(true);
-
-        setMines();
-        
+        boardPanel.revalidate();
+        boardPanel.repaint();
     }
 
     void setMines(){
@@ -193,5 +203,13 @@ public class Minesweeper {
             return 1;
         }
         return 0;
+    }
+
+    void restartGame() {
+        gameOver = false;
+        tilesClicked = 0;
+        textLabel.setText("Minesweeper: " + Integer.toString(mineCount));
+        initializeBoard();
+        setMines();
     }
 }

@@ -3,8 +3,6 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
-import org.w3c.dom.Text;
 
 
 public class Minesweeper {
@@ -102,6 +100,8 @@ public class Minesweeper {
             @Override
             public void actionPerformed(ActionEvent e) {
                 currentLevel = (Level) levelSelector.getSelectedItem();
+                mineCount = currentLevel.mines; // Update mine count
+                textLabel.setText("Minesweeper: " + mineCount); // Update the text label immediately
                 restartGame();
             }
         });
